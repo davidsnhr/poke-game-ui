@@ -1,92 +1,53 @@
+import { useEffect, useState } from 'react';
 import './App.css';
+import Actions from './game/buttons/Actions';
+import Pad from './game/buttons/Pad';
+import StartSelect from './game/buttons/StartSelect';
+import Screen from './game/screen';
 
 function App() {
+  const [pokemones, setPokemones] = useState([]);
+  const getPokemons = async () => {
+    const baseUrl = 'https://pokeapi.co/api/v2/';
+    try {
+      const res = await fetch(`${baseUrl}pokemon`);
+      if (res.ok) {
+        const pokemonList = await res.json();
+        console.log(pokemonList);
+        const pokemonDetails = await getPokeDetails(pokemonList.results);
+
+        setPokemones(pokemonDetails);
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const getPokeDetails = async (pokemonList) => {
+    try {
+      const details = await Promise.all(
+        pokemonList.map((pokemon) => fetch(pokemon.url))
+      );
+      const result = await Promise.all(details.map((detail) => detail.json()));
+      return result;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    getPokemons();
+  }, []);
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {/* container game */}
-        <div
-          style={{ width: '350px', height: '500px', border:"2px black solid", borderRadius:"5px 5px 35px 5px" }}
-        >
-          {/* container screen */}
-          <div
-            style={{
-              paddingTop: '5%',
-              paddingBottom: '25%',
-              justifyContent: 'center',
-              display: 'flex',
-            }}
-          >
-            <div
-              style={{
-                width: '85%',
-                height: '200px',
-                backgroundColor: 'olive',
-              }}
-            ></div>
-          </div>
-
+        <div className="container-game">
+          <Screen pokemones={pokemones} />
           {/* container buttons */}
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-            {/* botones direcciones */}
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                backgroundColor: 'black',
-              }}
-            >
-              <div>
-                <button
-                  style={{
-                    backgroundColor: 'blue',
-                    width: '40px',
-                    height: '40px',
-                  }}
-                ></button>
-              </div>
-              <div></div>
-            </div>
-            {/* botones select y start */}
-            <div style={{ paddingTop: '30%' }}>
-              <div
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  backgroundColor: 'gray',
-                }}
-              ></div>
-            </div>
-            {/* botones A Y B */}
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                display: 'flex',
-                backgroundColor: 'black',
-              }}
-            >
-              <div>
-                <button
-                  style={{
-                    backgroundColor: '#821660',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                  }}
-                ></button>
-              </div>
-              <div>
-                <button
-                  style={{
-                    backgroundColor: '#821660',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                  }}
-                ></button>
-              </div>
-            </div>
+            <Pad />
+            <StartSelect />
+            <Actions />
           </div>
         </div>
       </div>
