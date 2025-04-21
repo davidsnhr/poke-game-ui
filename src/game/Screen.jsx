@@ -1,26 +1,21 @@
-const Screen = ({ pokemones }) => {
+const Screen = ({ pokemones, hoverPokemon }) => {
   console.log(pokemones);
+
   return (
     <div className="container-screen">
       <div className="screen-text">
         <div className="screen">
-          {pokemones?.map((poke) => (
+          {pokemones?.map((pokemon) => (
             <div
-              key={poke.name}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '2%',
+                backgroundColor: `${
+                  hoverPokemon === pokemon.id ? 'yellow' : ''
+                }`,
               }}
             >
-              <img
-                src={poke.sprites.front_default}
-                alt="poke-image"
-                width={50}
-                height={50}
-              />
-              <p style={{ fontSize: '8px', fontFamily: 'Pokemon Classic' }}>
-                {poke.name}
+              <img src={pokemon.sprites.front_default} alt="pokemones" />
+              <p style={{ fontFamily: 'Pokemon Classic', fontSize: '8px' }}>
+                {pokemon.name}
               </p>
             </div>
           ))}

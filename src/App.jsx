@@ -7,46 +7,56 @@ import Screen from './game/screen';
 
 function App() {
   const [pokemones, setPokemones] = useState([]);
-  const getPokemons = async () => {
-    const baseUrl = 'https://pokeapi.co/api/v2/';
-    try {
-      const res = await fetch(`${baseUrl}pokemon`);
-      if (res.ok) {
-        const pokemonList = await res.json();
-        console.log(pokemonList);
-        const pokemonDetails = await getPokeDetails(pokemonList.results);
+  const [hoverPokemon, setHoverPokemon] = useState(0);
 
-        setPokemones(pokemonDetails);
-      }
-    } catch (error) {
-      console.error(error.message);
+  const BASE_URL = 'https://pokeapi.co/api/v2/';
+
+  const getPokemones = async () => {
+    const res = await fetch(`${BASE_URL}/pokemon`);
+    const data = await res.json();
+    const pokemonsDetails = await getDetails(data.results);
+    setPokemones(pokemonsDetails);
+  };
+
+  const getDetails = async (results) => {
+    const res = await Promise.all(results.map((result) => fetch(result.url)));
+    const data = await Promise.all(res.map((gato) => gato.json()));
+    return data;
+  };
+
+  const handlePress = (dir) => {
+    console.log(dir);
+    if (dir === 'right') {
+      setHoverPokemon(hoverPokemon + 1);
+    }
+    if (dir === 'left') {
+      setHoverPokemon(hoverPokemon - 1);
     }
   };
 
-  const getPokeDetails = async (pokemonList) => {
-    try {
-      const details = await Promise.all(
-        pokemonList.map((pokemon) => fetch(pokemon.url))
-      );
-      const result = await Promise.all(details.map((detail) => detail.json()));
-      return result;
-    } catch (error) {
-      console.error(error);
-    }
+  const handleSelectPokemon = () => {
+    console.log('select pokemon', hoverPokemon);
+    const pokemonSelected = pokemones.filter(
+      (pokemon) => pokemon.id === hoverPokemon
+    );
+
+    console.log({pokemonSelected});
   };
+
   useEffect(() => {
-    getPokemons();
+    getPokemones();
   }, []);
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {/* container game */}
         <div className="container-game">
-          <Screen pokemones={pokemones} />
+          <Screen pokemones={pokemones} hoverPokemon={hoverPokemon} />
           {/* container buttons */}
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-            <Pad />
-            <StartSelect />
+            <Pad handlePress={handlePress} />
+            <StartSelect handleSelectPokemon={handleSelectPokemon} />
             <Actions />
           </div>
         </div>
